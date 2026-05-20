@@ -3102,151 +3102,252 @@ where $p$ is the solution for the equation $display(sum_(i = 1)^k a_i b_i^p = 1)
 == Gamma Function
 
 #definition[
-  _Gamma function_ $Gamma(x)$ is the most common _extension_ of the factorial function to real and complex numbers.
-  It is defined for all complex numbers $z in CC$ (except non-positive integers) as
+  The _Gamma function_ is the most common _extension_ of the factorial to real and complex numbers.
+  For $z in CC$ with $Re(z) > 0$, it is defined by the _Euler integral_:
   $
     Gamma(z) = integral_0^infinity t^(z - 1) e^(-t) d t
   $
-  For positive integers $z = n$, it is defined as
+  For positive integers, $Gamma(n) = (n - 1)!$.
+]
+
+The factorial $n! = 1 dot 2 dot dots dot n$ is only defined for integers, and there are infinitely many ways to extend it to the reals.
+What makes $Gamma$ the _right_ one?
+
+#align(center)[
+  #cetz.canvas(length: 1.8cm, {
+    import cetz.draw: *
+    // Axes
+    line((-0.3, 0), (4.2, 0), stroke: 0.8pt + black, mark: (end: ">", fill: black))
+    line((0, -1.8), (0, 3.0), stroke: 0.8pt + black, mark: (end: ">", fill: black))
+    // X-axis labels
+    for (px, label) in ((1, [$1$]), (2, [$2$]), (3, [$3$]), (4, [$4$])) {
+      line((px, -0.06), (px, 0.06), stroke: 0.5pt)
+      content((px, -0.25), text(size: 0.6em, label))
+    }
+    // Y-axis labels
+    for (py, label) in ((1, [$1$]), (2, [$2$])) {
+      line((-0.06, py), (0.06, py), stroke: 0.5pt)
+      content((-0.25, py), text(size: 0.6em, label))
+    }
+    // Gamma function curve (hand-plotted key points)
+    let pts = (
+      (0.05, 19.5), // near pole at 0, shoots up
+      (0.2, 4.59),
+      (0.5, 1.77),
+      (1.0, 1.0),
+      (1.5, 0.89),
+      (2.0, 1.0),
+      (2.5, 1.33),
+      (3.0, 2.0),
+      (3.5, 3.32),
+      (4.0, 6.0),
+    )
+    // Scale y: map 0-6 to 0-2.7
+    let scaled = pts.map(((x, y)) => (x, calc.min(y * 0.45, 3.0)))
+    line(..scaled, stroke: 1.5pt + blue.darken(20%))
+    // Mark key points
+    for (x, y) in ((1.0, 1.0), (2.0, 1.0), (3.0, 2.0)) {
+      circle((x, y * 0.45), radius: 0.05, fill: blue.darken(20%), stroke: none)
+    }
+    // Label points
+    content((1.0, 0.45 + 0.2), text(size: 0.6em, fill: blue.darken(20%), [$1$]))
+    content((2.0, 0.45 + 0.2), text(size: 0.6em, fill: blue.darken(20%), [$1$]))
+    content((3.0, 0.9 + 0.2), text(size: 0.6em, fill: blue.darken(20%), [$2$]))
+    content((4.0, 2.7 + 0.2), text(size: 0.6em, fill: blue.darken(20%), [$6$]))
+    content((4.2, -0.4), text(size: 0.7em, [$x$]))
+    content((0.2, 3.0), text(size: 0.7em, fill: blue.darken(20%), [$Gamma(x)$]))
+  })
+]
+
+The plot shows $Gamma(x)$ for $x > 0$.
+It has poles at $x = 0, -1, -2, dots$.
+Key values: $Gamma(1) = 1$, $Gamma(2) = 1 = 1!$, $Gamma(3) = 2 = 2!$, $Gamma(4) = 6 = 3!$, $Gamma(1\/2) = sqrt(pi)$.
+
+== Bohr--Mollerup Theorem
+
+#theorem[
+  There is a _unique_ function $f : (0, infinity) to (0, infinity)$ satisfying all three conditions:
+  + $f(1) = 1$
+  + $f(x + 1) = x dot f(x)$ for all $x > 0$
+  + $ln f(x)$ is convex
+
+  That unique function is $f(x) = Gamma(x)$.
+]
+
+The first two conditions alone are not enough: there are infinitely many extensions of $n!$ satisfying the functional equation.
+Convexity of $ln Gamma$ is the natural smoothness requirement, ruling out functions that wiggle wildly between integer points.
+
+By Bohr--Mollerup, every definition satisfying these three conditions _must be_ $Gamma$.
+This is why the Euler integral, Gauss limit, and Weierstrass product, however different they look, all define the same function.
+
+== The Functional Equation
+
+#theorem[
+  For all $z$ with $Re(z) > 0$: $Gamma(z + 1) = z dot Gamma(z)$.
+  In particular, $Gamma(n + 1) = n!$ for every positive integer $n$.
+]
+
+#proof[
+  Start from $Gamma(z + 1) = integral_0^infinity t^z e^(-t) d t$.
+  Integrate by parts with $u = t^z$, $d v = e^(-t) d t$:
   $
-    Gamma(n) = (n - 1)!
+    Gamma(z + 1) = [-t^z e^(-t)]_0^infinity + z integral_0^infinity t^(z-1) e^(-t) d t
+  $
+  The boundary term vanishes: at $t = 0$ we get $t^z e^(-t) = 0$ (since $z > 0$), and at $t = infinity$ the exponential decay dominates.
+  Therefore $Gamma(z + 1) = z dot Gamma(z)$.
+  Iterating gives $Gamma(n + 1) = n dot dots dot 1 dot Gamma(1) = n!$, since $Gamma(1) = integral_0^infinity e^(-t) d t = 1$.
+]
+
+== Gauss's Limit Form
+
+#definition[
+  Gauss's _limit form_ defines $Gamma(x)$ for $x > 0$ as:
+  $
+    Gamma(x) := lim_(n to infinity) (n! dot n^x) / (product_(k = 0)^n (x + k))
   $
 ]
 
-*Motivation*:
-The factorial is defined for positive integers as $n! = 1 dot 2 dot dots dot n = (n - 1)! dot n$.
-We want to _extend_ this definition to _all real numbers_ and capture its _recursive_ nature.
-Specifically, we seek a smooth function $Gamma(x)$ such that:
-- $Gamma(n + 1) = n!$ for all $n in NN$, matching the factorial.
-- $Gamma(x + 1) = x dot Gamma(x)$, satisfying a recursive property.
-- $Gamma(x)$ is defined for all real numbers $x > 0$.
+#theorem[
+  The Gauss limit satisfies the same functional equation: $Gamma(x + 1) = x dot Gamma(x)$.
+]
 
-== Alternative Definitions
-$
-  Gamma(z) = integral_0^infinity t^(z - 1) e^(-t) d t
-$
+#proof[
+  Write $Gamma(x + 1)$ using the limit:
+  $
+    Gamma(x + 1)
+    = lim_(n to infinity) (n! dot n^(x+1)) / (product_(k = 0)^n (x + 1 + k))
+  $
+  Shift the index: $product_(k = 0)^n (x + 1 + k) = product_(k = 1)^(n+1) (x + k)$.
+  Factor out $Gamma(x)$ and the extra terms:
+  $
+    = lim_(n to infinity) x dot (n! dot n^x) / (product_(k = 0)^n (x+k)) dot n / (x + n + 1)
+  $
+  As $n to infinity$, the factor $n \/ (x + n + 1) to 1$, and the remaining limit is $x dot Gamma(x)$ by definition.
+]
 
-Gauss proposed a function $Gamma(x)$ defined by the _limit_
-$
-  Gamma(x) := lim_(n to infinity) (n! dot n^x) / (x dot (x+1) dot dots dot (x+n)) = lim_(n to infinity) (n! dot n^x) / (product_(k = 0)^n (x + k))
-  quad "for" x > 0
-$
+== Weierstrass Product
 
-== Integral Definition
+#definition[
+  The _Weierstrass product_ defines $1 \/ Gamma(x)$ as an infinite product:
+  $
+    1 / (Gamma(x)) = x dot e^(gamma x) dot product_(n = 1)^infinity ((1 + x \/ n) e^(-x \/ n))
+  $
+  where $gamma = lim_(n to infinity) (sum_(k=1)^n 1\/k - ln n) approx 0.5772$ is the _Euler--Mascheroni constant_.
+]
 
-$
-  Gamma(x) = integral_0^infinity t^(x - 1) e^(-t) d t
-$
-Let's check that the integral definition is indeed a suitable definition of a gamma function.
-
-$
-  Gamma(z + 1) & = integral_0^infinity t^z e^(-t) d t \
-               & = [-t^z e^(-t)]_0^infinity + integral_0^infinity z t^(z-1) e^(-t) d t \
-               & = lim_(t to infinity) (-t^z e^(-t)) - (-0^z e^(-0)) + z integral_0^infinity t^(z-1) e^(-t) d t
-$
-#v(-.5em)
-Note that $-t^z e^(-t) to 0$ as $t to infinity$, so:
-#v(-.5em)
-$
-  Gamma(z + 1)
-  = z integral_0^infinity t^(z-1) e^(-t) d t
-  = z dot Gamma(z)
-$
-
-== Limit Definition
-
-$
-  Gamma(x) = lim_(n to infinity) (n! dot n^x) / (product_(k = 0)^(n) (x + k))
-$
-Let's check that the limit definition is indeed a suitable definition of a gamma function.
-
-*Step 1*. Write $Gamma(x + 1)$.
-$
-  Gamma(x + 1)
-  = lim_(n to infinity) (n! dot n^(x+1)) / (product_(k = 0)^n (x + 1 + k))
-  = lim_(n to infinity) (n! dot n^(x+1)) / (product_(k = 1)^(n + 1) (x + k))
-$
-*Step 2*. Multiply both numerator and denominator by $x$ and rearrange:
-$
-  = lim_(n to infinity) (n! dot n^(x+1)) / ((x+1) dot dots dot (x+n+1))
-  = lim_(n to infinity) (n! dot n^x) / (x dot (x+1) dot dots dot (x+n)) dot n / (x + n + 1) dot x
-$
-*Step 3*. Take the limit.
-As $n to infinity$, the ratio $n / (x + n + 1)$ approaches $1$.
-$
-  Gamma(x + 1) = x dot Gamma(x)
-$
+This form defines $1 \/ Gamma(x)$ as an entire function (no poles), so the poles of $Gamma(x)$ at $x = 0, -1, -2, dots$ come from the simple zeros of the product.
+All three definitions satisfy the Bohr--Mollerup conditions, so they define the same function.
 
 == Equivalence of Definitions
 
-Let's prove the equivalence of two definitions: integral and limit.
+#theorem[
+  The Euler integral and Gauss limit definitions agree: for all $x > 0$,
+  $
+    integral_0^infinity t^(x-1) e^(-t) d t
+    = lim_(n to infinity) (n! dot n^x) / (product_(k = 0)^n (x + k))
+  $
+]
 
-We claim:
-$
-  integral_0^n t^(x-1) (1 - t / n)^n d t
-  eq.quest
-  lim_(n to infinity) (n! dot n^x) / (x dot (x + 1) dot dots dot (x + n))
-$
-Note that as $n to infinity$, the integrand $(1 - t / n)^n$ approaches $e^(-t)$, so this integral approximates $Gamma(x)$.
+#proof[
+  Define $I_n := integral_0^n t^(x-1) (1 - t\/n)^n d t$.
+  As $n to infinity$, $(1 - t\/n)^n to e^(-t)$, so $I_n to Gamma(x)$.
 
-Substitute $u = t / n$:
-$
-  integral_0^n t^(x-1) (1 - t / n)^n d t
-  = n^x integral_0^1 u^(x-1) (1-u)^n d u
-  = n^x dot Beta(x, n + 1)
-$
-where $Beta(x, n + 1)$ is the Beta function:
-$
-  Beta(x, y) = integral_0^1 t^(x-1) (1-t)^(y-1) d t = (Gamma(x) dot Gamma(y)) / Gamma(x + y)
-$
+  Substitute $u = t\/n$:
+  $
+    I_n = n^x integral_0^1 u^(x-1) (1-u)^n d u = n^x dot Beta(x, n+1)
+  $
+  where $Beta(x, y) = integral_0^1 t^(x-1) (1-t)^(y-1) d t$.
+  Using $Beta(x, y) = (Gamma(x) dot Gamma(y)) \/ Gamma(x + y)$:
+  $
+    I_n = n^x dot (Gamma(x) dot Gamma(n+1)) / Gamma(x + n + 1)
+    = (n! dot n^x) / (x dot (x+1) dot dots.c (x+n))
+  $
+  since $Gamma(n+1) = n!$ and $Gamma(x + n + 1) = (x+n)(x+n-1) dots.c x dot Gamma(x)$.
+  Taking $n to infinity$ and matching both sides completes the proof.
+]
 
-#pagebreak()
+== Euler's Reflection Formula
 
-Then:
-$
-  I_n
-  = n^x dot Beta(x, n + 1)
-  = n^x dot (Gamma(x) dot Gamma(n + 1)) / Gamma(x + n + 1)
-  = (n! dot n^x) / (x dot (x + 1) dot dots dot (x + n))
-$
+#theorem[
+  For all non-integer $x$:
+  $
+    Gamma(x) dot Gamma(1 - x) = pi / (sin(pi x))
+  $
+]
 
-Take the limit on both sides.
-Since $display(lim_(n to infinity) I_n = Gamma(x))$, we have:
-$
-  Gamma(x) = lim_(n to infinity) (n! dot n^x) / (x dot (x + 1) dot dots dot (x + n))
-$
+#example[
+  $Gamma(1\/2) dot Gamma(1\/2) = pi / sin(pi\/2) = pi$, so $Gamma(1\/2) = sqrt(pi)$.
+  This confirms that the factorial extends to half-integers: $(1\/2)! = Gamma(3\/2) = sqrt(pi) \/ 2$.
+]
+
+== Stirling's Approximation
+
+#theorem[
+  As $n to infinity$:
+  $
+    n! tilde sqrt(2 pi n) (n \/ e)^n
+  $
+  More precisely, $n! = sqrt(2 pi n) (n\/e)^n e^(theta_n)$ where $1 \/ (12 n + 1) < theta_n < 1 \/ (12 n)$.
+]
+
+Stirling's approximation lets us estimate factorials and binomial coefficients without computing huge products.
+For example, $binom(2n, n) approx 4^n \/ sqrt(pi n)$ follows directly.
+
+#example[
+  Estimate $10!$ using Stirling: $sqrt(20 pi) (10\/e)^10 approx 3.599 times 10^6$.
+  The exact value is $10! = 3628800 approx 3.629 times 10^6$, error less than $1%$.
+]
 
 == Gamma Function Applications
 
 The Gamma function provides closed forms for several important combinatorial expressions.
 
-- *Factorial extension:*
-  $
-    n! = Gamma(n + 1), quad e.g. thin Gamma(1 slash 2) = sqrt(pi)
-  $
-  Extends factorial to non-integer arguments.
+- *Factorial extension:* $n! = Gamma(n + 1)$, extending factorial to non-integer arguments.
 
 - *Generalized binomial coefficients* (for arbitrary $r in RR$):
-  $
-    binom(r, k) = Gamma(r + 1) / (Gamma(k + 1) dot Gamma(r - k + 1))
-  $
-  This is the definition underlying Newton's Binomial Theorem for real exponents.
+  $binom(r, k) = Gamma(r + 1) / (Gamma(k + 1) dot Gamma(r - k + 1))$, the definition underlying Newton's Binomial Theorem for real exponents.
 
-- *Stirling's approximation:*
-  $
-    n! = Gamma(n + 1) approx sqrt(2 pi n) thin (n / e)^n quad "as" n to infinity
-  $
-  Useful for estimating $binom(2n, n)$, entropy bounds, and worst-case algorithm analysis.
+- *Beta function:* $Beta(x, y) = (Gamma(x) Gamma(y)) / Gamma(x + y) = integral_0^1 t^(x-1) (1-t)^(y-1) d t$.
 
-- *Beta function:*
-  $
-    Beta(x, y) = (Gamma(x) Gamma(y)) / Gamma(x + y) = integral_0^1 t^(x-1) (1-t)^(y-1) d t
-  $
+- *Stirling's approximation:* $n! approx sqrt(2 pi n) (n / e)^n$, useful for estimating binomial coefficients and entropy bounds.
 
-#Block(color: yellow)[
-  $Gamma$ shows up whenever factorials, binomial coefficients, or power series hit non-integer parameters: probability distributions (Beta, Gamma, Student's $t$), analytic combinatorics, and elsewhere.
-]
+== Summary: Gamma Function
 
+#grid(
+  columns: 2,
+  column-gutter: 1em,
+  align(left + horizon)[
+    #Block(color: green, width: 100%)[
+      *Why $Gamma$ is unique* (Bohr--Mollerup)
+      + $Gamma(1) = 1$
+      + $Gamma(x+1) = x dot Gamma(x)$
+      + $ln Gamma(x)$ is convex
+    ]
+    #v(0.5em)
+    #Block(color: blue, width: 100%)[
+      *Three equivalent definitions*
+      - Euler integral: $integral_0^infinity t^(z-1) e^(-t) d t$
+      - Gauss limit: $lim (n! n^x) \/ (product (x+k))$
+      - Weierstrass: $1 \/ Gamma = x e^(gamma x) product ((1+x\/n)e^(-x\/n))$
+    ]
+  ],
+  align(left + horizon)[
+    #Block(color: orange, width: 100%)[
+      *Key properties*
+      - Functional equation: $Gamma(x+1) = x dot Gamma(x)$
+      - Integer values: $Gamma(n) = (n-1)!$
+      - Reflection: $Gamma(x) Gamma(1-x) = pi \/ sin(pi x)$
+      - $Gamma(1\/2) = sqrt(pi)$
+    ]
+    #v(0.5em)
+    #Block(color: purple, width: 100%)[
+      *Applications*
+      - Extends $n!$ to reals and complexes
+      - Generalizes $binom(n, k)$ to real $n$
+      - Stirling: $n! approx sqrt(2 pi n)(n\/e)^n$
+    ]
+  ],
+)
 
 == Bibliography
 #bibliography("refs.yml")
