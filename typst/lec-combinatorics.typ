@@ -3126,7 +3126,7 @@ The factorial $n! = 1 dot 2 dot dots.c dot n$ is defined only for non-negative i
 But many formulas _need_ factorial-like values at non-integer points:
 
 - *Generalized binomial coefficients:* $binom(r, k)$ for real $r$ requires a continuous version of $r!$.
-- *Probability:* the normal distribution involves $integral e^(-t^2) d t$, which evaluates to $sqrt(pi) = Gamma(1\/2)$.
+- *Probability:* the Gaussian integral $integral e^(-t^2) d t$ evaluates to a non-integer "factorial" value.
 - *Asymptotics:* Stirling's formula $n! approx sqrt(2 pi n)(n\/e)^n$ comes from the analytic properties of $Gamma$.
 
 How should we _interpolate_ $n!$ between the integers?
@@ -3143,7 +3143,10 @@ There are infinitely many smooth extensions; we need a principled way to choose.
 
 The integral converges for all $z$ with $Re(z) > 0$ because the exponential $e^(-t)$ decays faster than any power of $t$ grows.
 
-A quick check: $Gamma(1) = integral_0^infinity e^(-t) d t = 1$, and by a change of variable $t = s^2$ one obtains $Gamma(1\/2) = sqrt(pi)$.
+#example[
+  $Gamma(1) = integral_0^infinity e^(-t) d t = 1$.
+  A change of variable $t = s^2$ gives $Gamma(1\/2) = integral_0^infinity e^(-s^2) d s = sqrt(pi)$.
+]
 
 == The Functional Equation
 
@@ -3174,8 +3177,8 @@ A quick check: $Gamma(1) = integral_0^infinity e^(-t) d t = 1$, and by a change 
       // Axes
       line((-0.3, 0), (4.8, 0), stroke: 0.7pt + black, mark: (end: ">", fill: black))
       line((0, -0.3), (0, 3.8), stroke: 0.7pt + black, mark: (end: ">", fill: black))
-      // Y gridlines at Γ=2,4,6 (canvas y = value * sy = value * 0.5)
-      for (val, py) in ((2, 1), (4, 2), (6, 3)) {
+      // Y gridlines (canvas y = value * sy = value * 0.5)
+      for (val, py) in ((1, 0.5), (2, 1), (4, 2), (6, 3)) {
         line((0, py), (4.5, py), stroke: (dash: "dotted", paint: luma(80%)))
         content((-0.5, py), text(size: 0.8em, [#val]))
       }
@@ -3206,9 +3209,9 @@ A quick check: $Gamma(1) = integral_0^infinity e^(-t) d t = 1$, and by a change 
       line(..pts, stroke: 1.5pt + blue.darken(20%))
       // Mark factorial values
       let marks = (
-        (1, 1.00, (0.65, 0.72), [$0!$]),
-        (2, 1.00, (2.15, 0.72), [$1!$]),
-        (3, 2.00, (2.75, 1.18), [$2!$]),
+        (1, 1.00, (0.85, 0.90), [$0!$]),
+        (2, 1.00, (2.15, 0.75), [$1!$]),
+        (3, 2.00, (2.75, 1.22), [$2!$]),
         (4, 6.00, (3.55, 2.72), [$3!$]),
       )
       for (x, y, target, label) in marks {
@@ -3255,7 +3258,7 @@ A quick check: $Gamma(1) = integral_0^infinity e^(-t) d t = 1$, and by a change 
 The first two conditions alone are not enough: there are infinitely many extensions of $n!$ satisfying the functional equation.
 Convexity of $ln Gamma$ is the natural smoothness requirement, ruling out functions that wiggle wildly between integer points.
 By Bohr--Mollerup, any function satisfying these three conditions _must be_ $Gamma$.
-This guarantees that the Euler integral, the Gauss limit, and the Weierstrass product all define the same function.
+This will guarantee that the Gauss limit and Weierstrass product (introduced next) define the same function as the Euler integral.
 
 == Convexity of $ln Gamma$
 
@@ -3346,7 +3349,7 @@ The red dashed curve is an alternative extension that satisfies the first two Bo
 ]
 
 This form defines $1 \/ Gamma(x)$ as an entire function (no poles), so the poles of $Gamma(x)$ at $x = 0, -1, -2, dots$ come from the simple zeros of the product.
-By Bohr--Mollerup, all three definitions (Euler integral, Gauss limit, Weierstrass product) define the same function.
+Since all three definitions satisfy the Bohr--Mollerup conditions, they define the same function.
 
 == Equivalence of Definitions
 
@@ -3367,7 +3370,7 @@ By Bohr--Mollerup, all three definitions (Euler integral, Gauss limit, Weierstra
     I_n = n^x integral_0^1 u^(x-1) (1-u)^n d u = n^x dot Beta(x, n+1)
   $
   where $Beta(x, y) = integral_0^1 t^(x-1) (1-t)^(y-1) d t$.
-  Using $Beta(x, y) = (Gamma(x) dot Gamma(y)) \/ Gamma(x + y)$:
+  Using the Beta--Gamma relation $Beta(x, y) = (Gamma(x) dot Gamma(y)) \/ Gamma(x + y)$ (itself provable from the Euler integral):
   $
     I_n = n^x dot (Gamma(x) dot Gamma(n+1)) / Gamma(x + n + 1)
     = (n! dot n^x) / (x dot (x+1) dot dots.c (x+n))
@@ -3410,16 +3413,16 @@ For example, $binom(2n, n) approx 4^n \/ sqrt(pi n)$ follows directly.
 
 == Gamma Function Applications
 
-The Gamma function provides closed forms for several important combinatorial expressions.
-
-- *Factorial extension:* $n! = Gamma(n + 1)$, extending factorial to non-integer arguments.
+The Gamma function appears throughout combinatorics and analysis.
 
 - *Generalized binomial coefficients* (for arbitrary $r in RR$):
   $binom(r, k) = Gamma(r + 1) / (Gamma(k + 1) dot Gamma(r - k + 1))$, the definition underlying Newton's Binomial Theorem for real exponents.
 
 - *Beta function:* $Beta(x, y) = (Gamma(x) Gamma(y)) / Gamma(x + y) = integral_0^1 t^(x-1) (1-t)^(y-1) d t$.
 
-- *Stirling's approximation:* $n! approx sqrt(2 pi n) (n / e)^n$, useful for estimating binomial coefficients and entropy bounds.
+- *Volume of the $n$-ball:* $V_n = pi^(n\/2) \/ Gamma(n\/2 + 1)$, a natural application of $Gamma$ at half-integer arguments.
+
+- *Asymptotics of partitions and Stirling numbers:* leading terms involve $Gamma$ through saddle-point methods.
 
 == Summary: Gamma Function
 
