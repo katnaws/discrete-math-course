@@ -3120,19 +3120,126 @@ where $p$ is the solution for the equation $display(sum_(i = 1)^k a_i b_i^p = 1)
 
 #focus-slide()
 
-== Gamma Function
+== Why Extend the Factorial?
+
+The factorial $n! = 1 dot 2 dot dots.c dot n$ is defined only for non-negative integers.
+But many formulas _need_ factorial-like values at non-integer points:
+
+- *Generalized binomial coefficients:* $binom(r, k)$ for real $r$ requires a continuous version of $r!$.
+- *Probability:* the normal distribution involves $integral e^(-t^2) d t$, which evaluates to $sqrt(pi) = Gamma(1\/2)$.
+- *Asymptotics:* Stirling's formula $n! approx sqrt(2 pi n)(n\/e)^n$ comes from the analytic properties of $Gamma$.
+
+How should we _interpolate_ $n!$ between the integers?
+There are infinitely many smooth extensions; we need a principled way to choose.
+
+== Euler Integral Definition
 
 #definition[
-  The _Gamma function_ is the most common _extension_ of the factorial to real and complex numbers.
-  For $z in CC$ with $Re(z) > 0$, it is defined by the _Euler integral_:
+  The _Gamma function_ is defined for $z in CC$ with $Re(z) > 0$ by the _Euler integral_:
   $
     Gamma(z) = integral_0^infinity t^(z - 1) e^(-t) d t
   $
-  For positive integers, $Gamma(n) = (n - 1)!$.
 ]
 
-The factorial $n! = 1 dot 2 dot dots dot n$ is only defined for integers, and there are infinitely many ways to extend it to the reals.
-What makes $Gamma$ the _right_ one?
+The integral converges for all $z$ with $Re(z) > 0$ because the exponential $e^(-t)$ decays faster than any power of $t$ grows.
+
+A quick check: $Gamma(1) = integral_0^infinity e^(-t) d t = 1$, and by a change of variable $t = s^2$ one obtains $Gamma(1\/2) = sqrt(pi)$.
+
+== The Functional Equation
+
+#theorem[
+  For all $z$ with $Re(z) > 0$: $Gamma(z + 1) = z dot Gamma(z)$.
+  In particular, $Gamma(n + 1) = n!$ for every positive integer $n$.
+]
+
+#proof[
+  Start from $Gamma(z + 1) = integral_0^infinity t^z e^(-t) d t$.
+  Integrate by parts with $u = t^z$, $d v = e^(-t) d t$:
+  $
+    Gamma(z + 1) = [-t^z e^(-t)]_0^infinity + z integral_0^infinity t^(z-1) e^(-t) d t
+  $
+  The boundary term vanishes: at $t = 0$ we get $t^z e^(-t) = 0$ (since $z > 0$), and at $t = infinity$ the exponential decay dominates.
+  Therefore $Gamma(z + 1) = z dot Gamma(z)$.
+  Iterating gives $Gamma(n + 1) = n dot dots.c dot 1 dot Gamma(1) = n!$, since $Gamma(1) = integral_0^infinity e^(-t) d t = 1$.
+]
+
+== Plot of $Gamma(x)$
+
+#grid(
+  columns: (3fr, 2fr),
+  column-gutter: 1em,
+  align(left + horizon)[
+    #cetz.canvas(length: 1.4cm, {
+      import cetz.draw: *
+      // Axes
+      line((-0.3, 0), (4.8, 0), stroke: 0.7pt + black, mark: (end: ">", fill: black))
+      line((0, -0.3), (0, 3.8), stroke: 0.7pt + black, mark: (end: ">", fill: black))
+      // Y gridlines at Γ=2,4,6 (canvas y = value * sy = value * 0.5)
+      for (val, py) in ((2, 1), (4, 2), (6, 3)) {
+        line((0, py), (4.5, py), stroke: (dash: "dotted", paint: luma(80%)))
+        content((-0.5, py), text(size: 0.8em, [#val]))
+      }
+      // X ticks
+      for (px, label) in ((1, [$1$]), (2, [$2$]), (3, [$3$]), (4, [$4$])) {
+        line((px, -0.06), (px, 0.06), stroke: 0.5pt)
+        content((px, -0.28), text(size: 0.8em, label))
+      }
+      // Gamma curve
+      let raw = (
+        (0.15, 6.22), (0.20, 4.59), (0.25, 3.63), (0.30, 2.99),
+        (0.35, 2.54), (0.40, 2.22), (0.45, 1.97), (0.50, 1.77),
+        (0.55, 1.62), (0.60, 1.49), (0.65, 1.39), (0.70, 1.30),
+        (0.75, 1.23), (0.80, 1.16), (0.85, 1.11), (0.90, 1.07),
+        (0.95, 1.03), (1.00, 1.00), (1.05, 0.97), (1.10, 0.95),
+        (1.15, 0.93), (1.20, 0.92), (1.25, 0.91), (1.30, 0.90),
+        (1.35, 0.89), (1.40, 0.89), (1.45, 0.89), (1.50, 0.89),
+        (1.55, 0.89), (1.60, 0.89), (1.65, 0.90), (1.70, 0.91),
+        (1.75, 0.92), (1.80, 0.93), (1.85, 0.95), (1.90, 0.96),
+        (1.95, 0.98), (2.00, 1.00), (2.10, 1.05), (2.20, 1.10),
+        (2.30, 1.17), (2.40, 1.24), (2.50, 1.33), (2.60, 1.43),
+        (2.70, 1.54), (2.80, 1.68), (2.90, 1.83), (3.00, 2.00),
+        (3.10, 2.20), (3.20, 2.42), (3.30, 2.68), (3.40, 2.98),
+        (3.50, 3.32), (3.60, 3.72), (3.70, 4.17),
+      )
+      let sy = 1.0 / 2.0
+      let pts = raw.map(((x, y)) => (x, calc.min(y * sy, 3.6)))
+      line(..pts, stroke: 1.5pt + blue.darken(20%))
+      // Mark factorial values
+      let marks = (
+        (1, 1.00, (0.65, 0.72), [$0!$]),
+        (2, 1.00, (2.15, 0.72), [$1!$]),
+        (3, 2.00, (2.75, 1.18), [$2!$]),
+        (4, 6.00, (3.55, 2.72), [$3!$]),
+      )
+      for (x, y, target, label) in marks {
+        circle((x, y * sy), radius: 0.07, fill: blue.darken(20%), stroke: none)
+        content(target, text(fill: blue.darken(20%), label))
+      }
+      // Mark Gamma(1/2)
+      circle((0.5, 1.77 * sy), radius: 0.07, fill: orange.darken(20%), stroke: none)
+      content((0.58, 1.77 * sy + 0.18), text(fill: orange.darken(20%), [$sqrt(pi)$]))
+      content((4.6, -0.35), text(size: 0.8em, [$x$]))
+      content((0.25, 3.5), text(size: 0.8em, fill: blue.darken(20%), [$Gamma(x)$]))
+    })
+  ],
+  align(left + horizon)[
+    #Block(color: blue, width: 100%)[
+      *Key values*
+      + $Gamma(1) = 1 = 0!$
+      + $Gamma(2) = 1 = 1!$
+      + $Gamma(3) = 2 = 2!$
+      + $Gamma(4) = 6 = 3!$
+      + $Gamma(1\/2) = sqrt(pi) approx 1.77$
+    ]
+    #v(0.5em)
+    #Block(color: orange, width: 100%)[
+      *Behavior*
+      - Pole at $x = 0^+$: $Gamma(x) to +infinity$
+      - Minimum near $x approx 1.46$: $Gamma approx 0.89$
+      - Poles at all $x = 0, -1, -2, dots$
+    ]
+  ],
+)
 
 == Bohr--Mollerup Theorem
 
@@ -3147,9 +3254,8 @@ What makes $Gamma$ the _right_ one?
 
 The first two conditions alone are not enough: there are infinitely many extensions of $n!$ satisfying the functional equation.
 Convexity of $ln Gamma$ is the natural smoothness requirement, ruling out functions that wiggle wildly between integer points.
-
-By Bohr--Mollerup, every definition satisfying these three conditions _must be_ $Gamma$.
-This is why the Euler integral, Gauss limit, and Weierstrass product all define the same function.
+By Bohr--Mollerup, any function satisfying these three conditions _must be_ $Gamma$.
+This guarantees that the Euler integral, the Gauss limit, and the Weierstrass product all define the same function.
 
 == Convexity of $ln Gamma$
 
@@ -3200,105 +3306,7 @@ This is why the Euler integral, Gauss limit, and Weierstrass product all define 
 ]
 
 The chord (gray dashed) lies _above_ $ln Gamma$, confirming convexity.
-The red dashed curve is an alternative extension that satisfies the first two conditions but is _not_ convex.
-
-== The Functional Equation
-
-#theorem[
-  For all $z$ with $Re(z) > 0$: $Gamma(z + 1) = z dot Gamma(z)$.
-
-  In particular, $Gamma(n + 1) = n!$ for every positive integer $n$.
-]
-
-#proof[
-  Start from $Gamma(z + 1) = integral_0^infinity t^z e^(-t) d t$.
-  Integrate by parts with $u = t^z$, $d v = e^(-t) d t$:
-  $
-    Gamma(z + 1) = [-t^z e^(-t)]_0^infinity + z integral_0^infinity t^(z-1) e^(-t) d t
-  $
-  The boundary term vanishes: at $t = 0$ we get $t^z e^(-t) = 0$ (since $z > 0$), and at $t = infinity$ the exponential decay dominates.
-  Therefore $Gamma(z + 1) = z dot Gamma(z)$.
-  Iterating gives $Gamma(n + 1) = n dot dots dot 1 dot Gamma(1) = n!$, since $Gamma(1) = integral_0^infinity e^(-t) d t = 1$.
-]
-
-== Plot of $Gamma(x)$
-
-#grid(
-  columns: (3fr, 2fr),
-  column-gutter: 1em,
-  align(left + horizon)[
-    #cetz.canvas(length: 1.4cm, {
-      import cetz.draw: *
-      // Axes
-      line((-0.3, 0), (4.8, 0), stroke: 0.7pt + black, mark: (end: ">", fill: black))
-      line((0, -0.3), (0, 3.8), stroke: 0.7pt + black, mark: (end: ">", fill: black))
-      // Y gridlines at Γ=2,4,6 (canvas y = value * sy = value * 0.5)
-      for (val, py) in ((2, 1), (4, 2), (6, 3)) {
-        line((0, py), (4.5, py), stroke: (dash: "dotted", paint: luma(80%)))
-        content((-0.5, py), text(size: 0.8em, [#val]))
-      }
-      // X ticks
-      for (px, label) in ((1, [$1$]), (2, [$2$]), (3, [$3$]), (4, [$4$])) {
-        line((px, -0.06), (px, 0.06), stroke: 0.5pt)
-        content((px, -0.28), text(size: 0.8em, label))
-      }
-      // Gamma curve
-      let raw = (
-        (0.15, 6.22), (0.20, 4.59), (0.25, 3.63), (0.30, 2.99),
-        (0.35, 2.54), (0.40, 2.22), (0.45, 1.97), (0.50, 1.77),
-        (0.55, 1.62), (0.60, 1.49), (0.65, 1.39), (0.70, 1.30),
-        (0.75, 1.23), (0.80, 1.16), (0.85, 1.11), (0.90, 1.07),
-        (0.95, 1.03), (1.00, 1.00), (1.05, 0.97), (1.10, 0.95),
-        (1.15, 0.93), (1.20, 0.92), (1.25, 0.91), (1.30, 0.90),
-        (1.35, 0.89), (1.40, 0.89), (1.45, 0.89), (1.50, 0.89),
-        (1.55, 0.89), (1.60, 0.89), (1.65, 0.90), (1.70, 0.91),
-        (1.75, 0.92), (1.80, 0.93), (1.85, 0.95), (1.90, 0.96),
-        (1.95, 0.98), (2.00, 1.00), (2.10, 1.05), (2.20, 1.10),
-        (2.30, 1.17), (2.40, 1.24), (2.50, 1.33), (2.60, 1.43),
-        (2.70, 1.54), (2.80, 1.68), (2.90, 1.83), (3.00, 2.00),
-        (3.10, 2.20), (3.20, 2.42), (3.30, 2.68), (3.40, 2.98),
-        (3.50, 3.32), (3.60, 3.72), (3.70, 4.17),
-      )
-      // y scale: divide by 2 to fit nicely
-      let sy = 1.0 / 2.0
-      let pts = raw.map(((x, y)) => (x, calc.min(y * sy, 3.6)))
-      line(..pts, stroke: 1.5pt + blue.darken(20%))
-      // Mark factorial values — labels close to dots
-      let marks = (
-        (1, 1.00, (0.65, 0.72), [$0!$]),
-        (2, 1.00, (2.15, 0.72), [$1!$]),
-        (3, 2.00, (2.75, 1.18), [$2!$]),
-        (4, 6.00, (3.55, 2.72), [$3!$]),
-      )
-      for (x, y, target, label) in marks {
-        circle((x, y * sy), radius: 0.07, fill: blue.darken(20%), stroke: none)
-        content(target, text(fill: blue.darken(20%), label))
-      }
-      // Mark Gamma(1/2)
-      circle((0.5, 1.77 * sy), radius: 0.07, fill: orange.darken(20%), stroke: none)
-      content((0.58, 1.77 * sy + 0.18), text(fill: orange.darken(20%), [$sqrt(pi)$]))
-      content((4.6, -0.35), text(size: 0.8em, [$x$]))
-      content((0.25, 3.5), text(size: 0.8em, fill: blue.darken(20%), [$Gamma(x)$]))
-    })
-  ],
-  align(left + horizon)[
-    #Block(color: blue, width: 100%)[
-      *Key values*
-      + $Gamma(1) = 1 = 0!$
-      + $Gamma(2) = 1 = 1!$
-      + $Gamma(3) = 2 = 2!$
-      + $Gamma(4) = 6 = 3!$
-      + $Gamma(1\/2) = sqrt(pi) approx 1.77$
-    ]
-    #v(0.5em)
-    #Block(color: orange, width: 100%)[
-      *Behavior*
-      - Pole at $x = 0^+$: $Gamma(x) to +infinity$
-      - Minimum near $x approx 1.46$: $Gamma approx 0.89$
-      - Poles at all $x = 0, -1, -2, dots$
-    ]
-  ],
-)
+The red dashed curve is an alternative extension that satisfies the first two Bohr--Mollerup conditions but is _not_ convex.
 
 == Gauss's Limit Form
 
@@ -3338,7 +3346,7 @@ The red dashed curve is an alternative extension that satisfies the first two co
 ]
 
 This form defines $1 \/ Gamma(x)$ as an entire function (no poles), so the poles of $Gamma(x)$ at $x = 0, -1, -2, dots$ come from the simple zeros of the product.
-All three definitions satisfy the Bohr--Mollerup conditions, so they define the same function.
+By Bohr--Mollerup, all three definitions (Euler integral, Gauss limit, Weierstrass product) define the same function.
 
 == Equivalence of Definitions
 
