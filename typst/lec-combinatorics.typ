@@ -3134,56 +3134,6 @@ where $p$ is the solution for the equation $display(sum_(i = 1)^k a_i b_i^p = 1)
 The factorial $n! = 1 dot 2 dot dots dot n$ is only defined for integers, and there are infinitely many ways to extend it to the reals.
 What makes $Gamma$ the _right_ one?
 
-#align(center)[
-  #cetz.canvas(length: 1.8cm, {
-    import cetz.draw: *
-    // Axes
-    line((-0.3, 0), (4.2, 0), stroke: 0.8pt + black, mark: (end: ">", fill: black))
-    line((0, -1.8), (0, 3.0), stroke: 0.8pt + black, mark: (end: ">", fill: black))
-    // X-axis labels
-    for (px, label) in ((1, [$1$]), (2, [$2$]), (3, [$3$]), (4, [$4$])) {
-      line((px, -0.06), (px, 0.06), stroke: 0.5pt)
-      content((px, -0.25), text(size: 0.6em, label))
-    }
-    // Y-axis labels
-    for (py, label) in ((1, [$1$]), (2, [$2$])) {
-      line((-0.06, py), (0.06, py), stroke: 0.5pt)
-      content((-0.25, py), text(size: 0.6em, label))
-    }
-    // Gamma function curve (hand-plotted key points)
-    let pts = (
-      (0.05, 19.5), // near pole at 0, shoots up
-      (0.2, 4.59),
-      (0.5, 1.77),
-      (1.0, 1.0),
-      (1.5, 0.89),
-      (2.0, 1.0),
-      (2.5, 1.33),
-      (3.0, 2.0),
-      (3.5, 3.32),
-      (4.0, 6.0),
-    )
-    // Scale y: map 0-6 to 0-2.7
-    let scaled = pts.map(((x, y)) => (x, calc.min(y * 0.45, 3.0)))
-    line(..scaled, stroke: 1.5pt + blue.darken(20%))
-    // Mark key points
-    for (x, y) in ((1.0, 1.0), (2.0, 1.0), (3.0, 2.0)) {
-      circle((x, y * 0.45), radius: 0.05, fill: blue.darken(20%), stroke: none)
-    }
-    // Label points
-    content((1.0, 0.45 + 0.2), text(size: 0.6em, fill: blue.darken(20%), [$1$]))
-    content((2.0, 0.45 + 0.2), text(size: 0.6em, fill: blue.darken(20%), [$1$]))
-    content((3.0, 0.9 + 0.2), text(size: 0.6em, fill: blue.darken(20%), [$2$]))
-    content((4.0, 2.7 + 0.2), text(size: 0.6em, fill: blue.darken(20%), [$6$]))
-    content((4.2, -0.4), text(size: 0.7em, [$x$]))
-    content((0.2, 3.0), text(size: 0.7em, fill: blue.darken(20%), [$Gamma(x)$]))
-  })
-]
-
-The plot shows $Gamma(x)$ for $x > 0$.
-It has poles at $x = 0, -1, -2, dots$.
-Key values: $Gamma(1) = 1$, $Gamma(2) = 1 = 1!$, $Gamma(3) = 2 = 2!$, $Gamma(4) = 6 = 3!$, $Gamma(1\/2) = sqrt(pi)$.
-
 == Bohr--Mollerup Theorem
 
 #theorem[
@@ -3199,12 +3149,64 @@ The first two conditions alone are not enough: there are infinitely many extensi
 Convexity of $ln Gamma$ is the natural smoothness requirement, ruling out functions that wiggle wildly between integer points.
 
 By Bohr--Mollerup, every definition satisfying these three conditions _must be_ $Gamma$.
-This is why the Euler integral, Gauss limit, and Weierstrass product, however different they look, all define the same function.
+This is why the Euler integral, Gauss limit, and Weierstrass product all define the same function.
+
+== Convexity of $ln Gamma$
+
+#align(center)[
+  #cetz.canvas(length: 2cm, {
+    import cetz.draw: *
+    let yoff = 0.4
+    line((-0.2, yoff), (4.2, yoff), stroke: 0.7pt + black, mark: (end: ">", fill: black))
+    line((0, yoff - 0.7), (0, 2.5), stroke: 0.7pt + black, mark: (end: ">", fill: black))
+    content((-0.4, yoff - 0.25), text(size: 0.8em, [$0$]))
+    for px in (1, 2, 3) {
+      line((px, yoff - 0.05), (px, yoff + 0.05), stroke: 0.5pt)
+      content((px, yoff - 0.25), text(size: 0.8em, [#px]))
+    }
+    let sy = 1.4
+    // Accurate ln Γ values
+    let pts = (
+      (0.4, 0.797), (0.5, 0.572), (0.6, 0.398), (0.7, 0.261),
+      (0.8, 0.152), (0.9, 0.067), (1.0, 0.000),
+      (1.1, -0.050), (1.2, -0.085), (1.3, -0.108), (1.4, -0.120),
+      (1.5, -0.121), (1.6, -0.113), (1.7, -0.096), (1.8, -0.071),
+      (1.9, -0.039), (2.0, 0.000),
+      (2.1, 0.045), (2.2, 0.097), (2.3, 0.154), (2.4, 0.217),
+      (2.5, 0.285), (2.6, 0.358), (2.7, 0.435), (2.8, 0.517),
+      (2.9, 0.603), (3.0, 0.693),
+      (3.1, 0.787), (3.2, 0.886), (3.3, 0.987), (3.4, 1.093),
+      (3.5, 1.201), (3.6, 1.313), (3.7, 1.428),
+    )
+    let scaled = pts.map(((x, y)) => (x, y * sy + yoff))
+    line(..scaled, stroke: 1.5pt + blue.darken(20%))
+    // Chord from (1, ln Γ(1)=0) to (3, ln Γ(3)=ln2≈0.693)
+    line((1.0, yoff), (3.0, 0.693 * sy + yoff), stroke: (paint: black.lighten(40%), thickness: 1pt, dash: "dashed"))
+    let alt = (
+      (0.4, 0.797), (0.7, 0.261), (1.0, 0.000),
+      (1.2, -0.18), (1.4, -0.24), (1.5, -0.14),
+      (1.7, 0.12), (1.8, 0.15), (2.0, 0.000),
+      (2.2, -0.14), (2.4, -0.04), (2.5, 0.285),
+      (2.7, 0.435), (2.8, 0.517), (3.0, 0.693),
+      (3.2, 0.886), (3.4, 1.093), (3.5, 1.201), (3.7, 1.428),
+    )
+    let alt_scaled = alt.map(((x, y)) => (x, y * sy + yoff))
+    line(..alt_scaled, stroke: (paint: red.darken(20%), thickness: 1pt, dash: "dashed"))
+    content((2.3, 2.3), text(size: 0.8em, fill: blue.darken(20%), [$ln Gamma(x)$ " (convex)"]))
+    content((2.3, 1.9), text(size: 0.8em, fill: red.darken(20%), ["non-convex alternative"]))
+    content((4.0, yoff - 0.7), text(size: 0.8em, [$x$]))
+    content((0.2, 2.4), text(size: 0.8em, [$ln f$]))
+  })
+]
+
+The chord (gray dashed) lies _above_ $ln Gamma$, confirming convexity.
+The red dashed curve is an alternative extension that satisfies the first two conditions but is _not_ convex.
 
 == The Functional Equation
 
 #theorem[
   For all $z$ with $Re(z) > 0$: $Gamma(z + 1) = z dot Gamma(z)$.
+
   In particular, $Gamma(n + 1) = n!$ for every positive integer $n$.
 ]
 
@@ -3218,6 +3220,85 @@ This is why the Euler integral, Gauss limit, and Weierstrass product, however di
   Therefore $Gamma(z + 1) = z dot Gamma(z)$.
   Iterating gives $Gamma(n + 1) = n dot dots dot 1 dot Gamma(1) = n!$, since $Gamma(1) = integral_0^infinity e^(-t) d t = 1$.
 ]
+
+== Plot of $Gamma(x)$
+
+#grid(
+  columns: (3fr, 2fr),
+  column-gutter: 1em,
+  align(left + horizon)[
+    #cetz.canvas(length: 1.4cm, {
+      import cetz.draw: *
+      // Axes
+      line((-0.3, 0), (4.8, 0), stroke: 0.7pt + black, mark: (end: ">", fill: black))
+      line((0, -0.3), (0, 3.8), stroke: 0.7pt + black, mark: (end: ">", fill: black))
+      // Y gridlines at Γ=2,4,6 (canvas y = value * sy = value * 0.5)
+      for (val, py) in ((2, 1), (4, 2), (6, 3)) {
+        line((0, py), (4.5, py), stroke: (dash: "dotted", paint: luma(80%)))
+        content((-0.5, py), text(size: 0.8em, [#val]))
+      }
+      // X ticks
+      for (px, label) in ((1, [$1$]), (2, [$2$]), (3, [$3$]), (4, [$4$])) {
+        line((px, -0.06), (px, 0.06), stroke: 0.5pt)
+        content((px, -0.28), text(size: 0.8em, label))
+      }
+      // Gamma curve
+      let raw = (
+        (0.15, 6.22), (0.20, 4.59), (0.25, 3.63), (0.30, 2.99),
+        (0.35, 2.54), (0.40, 2.22), (0.45, 1.97), (0.50, 1.77),
+        (0.55, 1.62), (0.60, 1.49), (0.65, 1.39), (0.70, 1.30),
+        (0.75, 1.23), (0.80, 1.16), (0.85, 1.11), (0.90, 1.07),
+        (0.95, 1.03), (1.00, 1.00), (1.05, 0.97), (1.10, 0.95),
+        (1.15, 0.93), (1.20, 0.92), (1.25, 0.91), (1.30, 0.90),
+        (1.35, 0.89), (1.40, 0.89), (1.45, 0.89), (1.50, 0.89),
+        (1.55, 0.89), (1.60, 0.89), (1.65, 0.90), (1.70, 0.91),
+        (1.75, 0.92), (1.80, 0.93), (1.85, 0.95), (1.90, 0.96),
+        (1.95, 0.98), (2.00, 1.00), (2.10, 1.05), (2.20, 1.10),
+        (2.30, 1.17), (2.40, 1.24), (2.50, 1.33), (2.60, 1.43),
+        (2.70, 1.54), (2.80, 1.68), (2.90, 1.83), (3.00, 2.00),
+        (3.10, 2.20), (3.20, 2.42), (3.30, 2.68), (3.40, 2.98),
+        (3.50, 3.32), (3.60, 3.72), (3.70, 4.17),
+      )
+      // y scale: divide by 2 to fit nicely
+      let sy = 1.0 / 2.0
+      let pts = raw.map(((x, y)) => (x, calc.min(y * sy, 3.6)))
+      line(..pts, stroke: 1.5pt + blue.darken(20%))
+      // Mark factorial values — labels close to dots
+      let marks = (
+        (1, 1.00, (0.65, 0.72), [$0!$]),
+        (2, 1.00, (2.15, 0.72), [$1!$]),
+        (3, 2.00, (2.75, 1.18), [$2!$]),
+        (4, 6.00, (3.55, 2.72), [$3!$]),
+      )
+      for (x, y, target, label) in marks {
+        circle((x, y * sy), radius: 0.07, fill: blue.darken(20%), stroke: none)
+        content(target, text(fill: blue.darken(20%), label))
+      }
+      // Mark Gamma(1/2)
+      circle((0.5, 1.77 * sy), radius: 0.07, fill: orange.darken(20%), stroke: none)
+      content((0.58, 1.77 * sy + 0.18), text(fill: orange.darken(20%), [$sqrt(pi)$]))
+      content((4.6, -0.35), text(size: 0.8em, [$x$]))
+      content((0.25, 3.5), text(size: 0.8em, fill: blue.darken(20%), [$Gamma(x)$]))
+    })
+  ],
+  align(left + horizon)[
+    #Block(color: blue, width: 100%)[
+      *Key values*
+      + $Gamma(1) = 1 = 0!$
+      + $Gamma(2) = 1 = 1!$
+      + $Gamma(3) = 2 = 2!$
+      + $Gamma(4) = 6 = 3!$
+      + $Gamma(1\/2) = sqrt(pi) approx 1.77$
+    ]
+    #v(0.5em)
+    #Block(color: orange, width: 100%)[
+      *Behavior*
+      - Pole at $x = 0^+$: $Gamma(x) to +infinity$
+      - Minimum near $x approx 1.46$: $Gamma approx 0.89$
+      - Poles at all $x = 0, -1, -2, dots$
+    ]
+  ],
+)
 
 == Gauss's Limit Form
 
