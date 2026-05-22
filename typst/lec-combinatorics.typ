@@ -2645,8 +2645,29 @@ $
 
 The annihilator method is a systematic five-step procedure for solving recurrences.
 
+#align(center)[
+  #cetz.canvas(length: 1cm, {
+    import cetz.draw: *
+    let steps = (
+      ("recurrence", green),
+      ("operator form", blue),
+      ("annihilator", purple),
+      ("factors", orange),
+      ("solution", red.darken(20%)),
+    )
+    for (i, (label, color)) in steps.enumerate() {
+      let x = float(i) * 2.6
+      rect((x, -0.35), (x + 2.2, 0.35), fill: color.lighten(90%), stroke: 0.7pt + color.darken(20%), radius: 3pt)
+      content((x + 1.1, 0), text(size: 0.8em, fill: color.darken(30%), strong(label)))
+      if i < steps.len() - 1 {
+        content((x + 2.4, 0), text(size: 0.8em, [$arrow.r.double$]))
+      }
+    }
+  })
+]
+
 + _Rewrite_ the recurrence in operator form (replace $a_n$ with $shift$-operators).
-+ _Identify_ the annihilator of the _left-hand side_ and annihilate the _residue_ (right-hand side) by multiplying additional factors.
++ _Identify_ the annihilator of both sides and multiply additional factors to kill the residue.
 + _Factor_ the annihilator into linear factors $(shift - a)$.
 + _Read off_ the generic solution from the factorization (one term per factor, using the summary table).
 + _Fit_ the initial conditions to determine the free constants.
