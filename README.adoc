@@ -75,7 +75,7 @@ image:https://img.shields.io/badge/Course Syllabus-Discrete Math-blue?style=soci
 == Build
 
 // For the `.typ` files (in `typst/*` directory), use link:https://typst.app/[Typst].
-To compile PFDs, use link:https://typst.app/[Typst]:
+To compile PDFs, use link:https://typst.app/[Typst]:
 
 [source]
 ----
